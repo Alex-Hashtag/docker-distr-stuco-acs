@@ -1,83 +1,93 @@
+#!/bin/bash
+
 # Configuration
 LOG_DIR="./logs"
 TIMEOUT_MINUTES=30
 SWAP_LIMIT_MB=1500
-MAX_RETRIES=2
 
 # Initialize
 mkdir -p "$LOG_DIR"
 export COMPOSE_HTTP_TIMEOUT=$((TIMEOUT_MINUTES * 60))
 
-# Resource Monitor (runs in background)
-start_monitor() {
-  echo -e "\n🖥️  Starting resource monitor..."
-  {
-    echo "Timestamp,CPU%,Memory(MB),Swap(MB),DiskIO(kB/s)"
-    while true; do
-      stats=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
-      mem=$(free -m | awk '/Mem:/{print $3}')
-      swap=$(free -m | awk '/Swap:/{print $3}')
-      io=$(iostat -d -k | awk '/^[v|s]d/{print $4}')
-      echo "$(date '+%H:%M:%S'),$stats,$mem,$swap,$io"
-      sleep 5
-    done
-  } > "$LOG_DIR/resources.csv" &
-  MONITOR_PID=$!
-}
+# Colored output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-# Cleanup with retries
-safe_cleanup() {
-  echo -e "\n🧹 Cleaning up..."
-  for i in $(seq 1 $MAX_RETRIES); do
-    docker-compose down && break || {
-      echo "Attempt $i failed. Retrying..."
-      sleep 5
-    }
+# Live logging function
+log_live() {
+  while read -r line; do
+    # Filter important messages
+    if [[ "$line" == *"Step"* || "$line" == *"npm"* || "$line" == *"gradle"* ]]; then
+      echo -e "${YELLOW}[BUILD]${NC} $line"
+    elif [[ "$line" == *"ERROR"* || "$line" == *"Failed"* ]]; then
+      echo -e "${RED}[ERROR]${NC} $line"
+    fi
+    echo "$line" >> "$LOG_DIR/full.log"
   done
 }
 
-# Build with timeout
-build_with_timeout() {
-  echo -e "\n🔨 Building services (Timeout: ${TIMEOUT_MINUTES}min)..."
-  timeout ${TIMEOUT_MINUTES}m docker-compose build --progress=plain 2>&1 | tee "$LOG_DIR/build.log"
+# Resource Monitor
+start_monitor() {
+  echo -e "\n${YELLOW}🖥️  Starting resource monitor...${NC}"
+  {
+    while true; do
+      echo -ne "\r${YELLOW}SYSTEM:${NC} CPU $(grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf "%.1f%%", usage}') | "
+      echo -ne "RAM $(free -m | awk '/Mem:/{printf "%.1fGB/%.1fGB", $3/1024, $2/1024}') | "
+      echo -ne "SWAP $(free -m | awk '/Swap:/{printf "%dMB", $3}')"
+      sleep 5
+    done
+  } &
+  MONITOR_PID=$!
+}
+
+# Cleanup
+safe_cleanup() {
+  echo -e "\n${YELLOW}🧹 Cleaning up old containers...${NC}"
+  docker-compose down 2>&1 | log_live
+}
+
+# Build with live feedback
+build_services() {
+  echo -e "\n${GREEN}🔨 Building services (Timeout: ${TIMEOUT_MINUTES}min)...${NC}"
+  timeout ${TIMEOUT_MINUTES}m docker-compose build --progress=plain 2>&1 | log_live
   return $?
 }
 
-# Main execution
-try_up() {
-  echo -e "\n🚀 Starting services..."
-  docker-compose up -d
+# Start services
+start_services() {
+  echo -e "\n${GREEN}🚀 Starting services...${NC}"
+  docker-compose up -d 2>&1 | log_live
 }
 
 # ========================
-# Execution Flow
+# Main Execution
 # ========================
+
+clear
+echo -e "${GREEN}=== STUCO-ACS Deployment ===${NC}"
+echo -e "Start: $(date)\nLogs: $LOG_DIR/"
+
 start_monitor
-
-echo "=== STUCO-ACS Deployment ==="
-echo "Start: $(date)"
-echo "Logs: $LOG_DIR/"
-
 safe_cleanup
 
-if build_with_timeout; then
-  if try_up; then
-    echo -e "\n✅ Services started successfully!"
-    echo "Service status:"
+if build_services; then
+  if start_services; then
+    echo -e "\n${GREEN}✅ Services started successfully!${NC}"
+    echo -e "\n${YELLOW}Container status:${NC}"
     docker-compose ps
     
-    echo -e "\n📋 Tailing logs (Ctrl+C to exit)..."
-    docker-compose logs -f --tail=50 2>&1 | tee "$LOG_DIR/runtime.log" &
-    tail -f "$LOG_DIR/runtime.log"
+    echo -e "\n${GREEN}📋 Live logs (Ctrl+C to exit):${NC}"
+    docker-compose logs -f --tail=10 2>&1 | tee "$LOG_DIR/runtime.log"
   else
-    echo -e "\n❌ Failed to start services!"
-    docker-compose logs > "$LOG_DIR/startup_failure.log"
+    echo -e "\n${RED}❌ Failed to start services!${NC}"
+    docker-compose logs --tail=50 > "$LOG_DIR/startup_failure.log"
   fi
 else
-  echo -e "\n❌ Build timed out after ${TIMEOUT_MINUTES} minutes!"
-  echo "Check $LOG_DIR/build.log for details"
+  echo -e "\n${RED}❌ Build timed out after ${TIMEOUT_MINUTES} minutes!${NC}"
 fi
 
 # Cleanup
 kill $MONITOR_PID 2>/dev/null
-echo -e "\nDeployment ended at: $(date)"
+echo -e "\n${GREEN}Deployment ended at: $(date)${NC}"
