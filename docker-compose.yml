@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    ports:
+      - "5173:5173"  # Host:Container
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    ports:
+      - "8080:8080"
+
+  email-service:
+    build:
+      context: .
+      dockerfile: docker/email-service.Dockerfile
+    ports:
+      - "8081:8081"
