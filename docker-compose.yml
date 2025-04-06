@@ -6,7 +6,9 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "5173:5173"  # Host:Container
+      - "80:80"
+    networks:
+      - stuco-net
 
   backend:
     build:
@@ -14,6 +16,8 @@ services:
       dockerfile: docker/backend.Dockerfile
     ports:
       - "8080:8080"
+    networks:
+      - stuco-net
 
   email-service:
     build:
@@ -21,3 +25,8 @@ services:
       dockerfile: docker/email-service.Dockerfile
     ports:
       - "8081:8081"
+    networks:
+      - stuco-net
+
+networks:
+  stuco-net:

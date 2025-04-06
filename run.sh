@@ -1,33 +1,22 @@
 #!/bin/bash
 
-# Exit on any error
-set -e
-
-# Define log directory
+# Initialize
 LOG_DIR="./logs"
 mkdir -p "$LOG_DIR"
+export COMPOSE_HTTP_TIMEOUT=200
 
-# Clean up old containers (optional)
-echo "Cleaning up old containers..."
-docker-compose down || true
+# Cleanup old containers
+docker-compose down || echo "No existing containers to remove"
 
-# Build and start services
+# Build and start
 echo "Building and starting services..."
 docker-compose up -d --build
 
-# Follow logs with colored output and save to files
-echo "Tailing logs to $LOG_DIR/..."
-docker-compose logs -f --tail=50 frontend > "$LOG_DIR/frontend.log" 2>&1 &
-docker-compose logs -f --tail=50 backend > "$LOG_DIR/backend.log" 2>&1 &
-docker-compose logs -f --tail=50 email-service > "$LOG_DIR/email-service.log" 2>&1 &
+# Log services
+echo "Service status:"
+docker-compose ps
 
-# Print access info
-echo -e "\n\033[1;32mServices are running!\033[0m"
-echo -e "Frontend:    \033[1;34mhttps://stucoacs.com\033[0m"
-echo -e "Backend API: \033[1;34mhttps://stucoacs.com/api/\033[0m"
-echo -e "Email API:   \033[1;34mhttps://stucoacs.com/email/\033[0m"
-echo -e "\nView logs:   \033[1;33mtail -f $LOG_DIR/*.log\033[0m"
-echo -e "Stop services: \033[1;33mdocker-compose down\033[0m"
-
-# Attach to the frontend log by default (Ctrl+C to exit)
-tail -f "$LOG_DIR/frontend.log"
+# Tail logs
+echo -e "\nTailing logs (Ctrl+C to exit)..."
+docker-compose logs -f --tail=50 2>&1 | tee "$LOG_DIR/combined.log" &
+tail -f "$LOG_DIR/combined.log"
