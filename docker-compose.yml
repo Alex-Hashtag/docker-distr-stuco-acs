@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "5173:80"  # React on 5173 → Nginx on 80
+      - "5173:5173"
     networks:
       - stuco-net
     restart: unless-stopped
