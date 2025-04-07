@@ -4,7 +4,7 @@ RUN git clone https://Alex-Hashtag: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@gith
 RUN gradle build -x test
 
 FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app-mail
-COPY --from=build /app/build/libs/app-mail.jar .
+WORKDIR /app
+COPY --from=build /app/build/libs/app.jar .
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
