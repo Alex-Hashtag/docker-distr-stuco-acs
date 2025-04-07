@@ -3,8 +3,9 @@ WORKDIR /app
 RUN git clone https://Alex-Hashtag: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@github.com/Alex-Hashtag/back-end.git .
 RUN gradle build -x test
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+# Copy only the main application JAR (adjust the filename pattern if needed)
+COPY --from=build /app/build/libs/back-end-*.jar app.jar
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
