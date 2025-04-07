@@ -1,10 +1,7 @@
-FROM gradle:8-jdk21-alpine AS build
+# backend.Dockerfile
+FROM gradle:8-jdk21-alpine
 WORKDIR /app
 RUN git clone https://Alex-Hashtag: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@github.com/Alex-Hashtag/back-end.git .
 RUN gradle build -x test
-
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-COPY --from=build /app/build/libs/app.jar .
 EXPOSE 8080
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "build/libs/app.jar"]
