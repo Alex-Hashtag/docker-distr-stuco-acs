@@ -6,9 +6,10 @@ services:
       context: .
       dockerfile: docker/frontend.Dockerfile
     ports:
-      - "80:80"
+      - "5173:80"  # React on 5173 → Nginx on 80
     networks:
       - stuco-net
+    restart: unless-stopped
 
   backend:
     build:
@@ -16,8 +17,11 @@ services:
       dockerfile: docker/backend.Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - stuco-net
+    restart: unless-stopped
 
   email-service:
     build:
@@ -27,6 +31,7 @@ services:
       - "8081:8081"
     networks:
       - stuco-net
+    restart: unless-stopped
 
 networks:
   stuco-net:

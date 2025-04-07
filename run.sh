@@ -5,6 +5,34 @@ LOG_DIR="./logs"
 TIMEOUT_MINUTES=30
 SWAP_LIMIT_MB=1500
 
+# Validate critical files
+REQUIRED_FILES=(
+  "docker/nginx-frontend.conf"
+  "docker-compose.yml"
+)
+
+for file in "${REQUIRED_FILES[@]}"; do
+  if [ ! -f "$file" ]; then
+    echo -e "\n${RED}❌ Missing required file: $file${NC}"
+    echo -e "Create it with:\n"
+    if [ "$file" == "docker/nginx-frontend.conf" ]; then
+      echo "mkdir -p docker"
+      echo "cat > docker/nginx-frontend.conf <<'EOF'"
+      echo "server {"
+      echo "    listen 80;"
+      echo "    server_name localhost;"
+      echo "    location / {"
+      echo "        root /usr/share/nginx/html;"
+      echo "        index index.html;"
+      echo "        try_files \$uri \$uri/ /index.html;"
+      echo "    }"
+      echo "}"
+      echo "EOF"
+    fi
+    exit 1
+  fi
+done
+
 # Initialize
 mkdir -p "$LOG_DIR"
 export COMPOSE_HTTP_TIMEOUT=$((TIMEOUT_MINUTES * 60))

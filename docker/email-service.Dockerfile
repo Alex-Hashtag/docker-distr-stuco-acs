@@ -1,4 +1,4 @@
-FROM gradle:8-jdk17-alpine AS build
+FROM gradle:8-jdk21-alpine AS build
 WORKDIR /app
 RUN git clone https://Alex-Hashtag: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@github.com/Alex-Hashtag/email-service.git .
 RUN gradle build -x test
