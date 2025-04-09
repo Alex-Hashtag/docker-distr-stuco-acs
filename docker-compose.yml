@@ -3,11 +3,13 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./front-end
-      dockerfile: ../docker/frontend.Dockerfile
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
     ports:
       - "80:80"
       - "443:443"
+    volumes:
+      - ./docker/ssl:/etc/nginx/ssl:ro
     networks:
       - stuco-net
     depends_on:
@@ -18,8 +20,6 @@ services:
     build:
       context: ./back-end
       dockerfile: ../docker/backend.Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - stuco-net
     restart: unless-stopped

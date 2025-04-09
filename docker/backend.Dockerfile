@@ -4,5 +4,3 @@ RUN git clone https://Alex-Hashtag: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@gith
 RUN gradle build -x test
 EXPOSE 8080
 CMD ["java", "-jar", "build/libs/app.jar"]
-
-
