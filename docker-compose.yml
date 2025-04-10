@@ -1,13 +1,10 @@
-version: "3.8"
+version: '3.8'
 
 services:
   frontend:
     build:
       context: .
       dockerfile: ./docker/frontend.Dockerfile
-      args:
-        GITHUB_USERNAME: ${GITHUB_USERNAME}
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
     ports:
       - "80:80"
       - "443:443"
@@ -21,22 +18,16 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: ./docker/backend.Dockerfile
-      args:
-        GITHUB_USERNAME: ${GITHUB_USERNAME}
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
+      context: ./back-end
+      dockerfile: ../docker/backend.Dockerfile
     networks:
       - stuco-net
     restart: unless-stopped
 
   email-service:
     build:
-      context: .
-      dockerfile: ./docker/email-service.Dockerfile
-      args:
-        GITHUB_USERNAME: ${GITHUB_USERNAME}
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
+      context: ./email-service
+      dockerfile: ../docker/email-service.Dockerfile
     networks:
       - stuco-net
     restart: unless-stopped
