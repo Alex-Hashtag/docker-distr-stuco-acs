@@ -3,8 +3,6 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
-      dockerfile: docker/frontend.Dockerfile
       context: ./front-end
       dockerfile: ../docker/frontend.Dockerfile
     ports:
@@ -40,3 +38,4 @@ services:
     restart: unless-stopped
 
 networks:
+  stuco-net:
