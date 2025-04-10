@@ -3,12 +3,13 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./front-end
-      dockerfile: ../docker/frontend.Dockerfile
+      context: .
+      dockerfile: ./docker/frontend.Dockerfile
     ports:
-      - "5173:5173"
       - "80:80"
       - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
     networks:
       - stuco-net
     depends_on:
@@ -17,8 +18,8 @@ services:
 
   backend:
     build:
-      context: ./back-end
-      dockerfile: ../docker/backend.Dockerfile
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
     ports:
       - "8080:8080"
     environment:
@@ -29,8 +30,8 @@ services:
 
   email-service:
     build:
-      context: ./email-service
-      dockerfile: ../docker/email-service.Dockerfile
+      context: .
+      dockerfile: ./docker/email-service.Dockerfile
     ports:
       - "8081:8081"
     networks:
