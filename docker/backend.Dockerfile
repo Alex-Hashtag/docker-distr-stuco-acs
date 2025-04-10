@@ -3,7 +3,6 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 # Copy backend source code
-COPY ./backend/ .
 
 RUN gradle build -x test
 EXPOSE 8080

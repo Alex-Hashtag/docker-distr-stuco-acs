@@ -3,7 +3,7 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: .
+      context: ./backend/
       dockerfile: ./docker/frontend.Dockerfile
     ports:
       - "80:80"
@@ -18,7 +18,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./email-service/
       dockerfile: ./docker/backend.Dockerfile
     ports:
       - "8080:8080"
