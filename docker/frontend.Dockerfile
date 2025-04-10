@@ -4,8 +4,7 @@ WORKDIR /app
 RUN apk add --no-cache git
 
 ARG GITHUB_TOKEN
-RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" && \
-    git clone https://github.com/Alex-Hashtag/front-end.git .
+RUN git clone https://${GITHUB_TOKEN}@github.com/Alex-Hashtag/front-end.git .
 
 RUN npm install --legacy-peer-deps
 RUN npm run build
