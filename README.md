@@ -1,79 +1,78 @@
-# ACS Student Council Website Docker Distribution
+# ACS Student Council Website Docker Deployment
 
-This package contains everything needed to deploy the ACS Student Council website on a remote Linux server.
+This repository contains all the necessary Docker files to deploy the ACS Student Council website on any Linux server.
 
 ## Prerequisites
 
-- Docker
-- Docker Compose (v3.8+)
-- SSL certificates (for HTTPS)
+- Docker and Docker Compose installed on the server
+- GitHub credentials with access to the relevant repositories
+- SSL certificates (if using HTTPS)
 
 ## Setup Instructions
 
-### 1. Prepare the Package
+### 1. Configure GitHub Credentials
 
-Run the included preparation script:
+Create a `.env` file in the root directory with your GitHub credentials:
 
 ```bash
-chmod +x prepare-package.sh
-./prepare-package.sh
+# .env file
+GITHUB_USERNAME=your_github_username
+GITHUB_TOKEN=your_github_token
 ```
 
-This script will create the necessary directory structure and provide guidance on where to place your files.
+### 2. SSL Certificates (for HTTPS)
 
-### 2. Copy Your Source Code and Assets
+Place your SSL certificates in the `docker/ssl` directory:
+- `certificate.crt` - Your SSL certificate
+- `private.key` - Your private key
 
-- Copy your frontend code to the `frontend/` directory
-- Copy your backend code to the `backend/` directory  
-- Copy your email service code to the `email-service/` directory
-- Copy your SSL certificates to the `ssl/` directory:
-  - `fullchain.pem` - Your SSL certificate chain
-  - `privkey.pem` - Your SSL private key
+If you don't have SSL certificates yet, you can:
+- Use Let's Encrypt to generate free certificates
+- Remove the SSL-related volumes from docker-compose.yml for HTTP-only deployment
 
-### 3. Transfer to Remote Server
+### 3. Build and Deploy
 
-Transfer the entire `docker-distr` directory to your remote Linux server:
-
-```bash
-# Example using scp
-scp -r docker-distr user@remote-server:/path/to/destination
-```
-
-### 4. Build and Run
-
-SSH into your remote server, navigate to the docker-distr directory, and run:
+Run the following commands to build and start the services:
 
 ```bash
-cd /path/to/docker-distr
+# Build all containers
+docker-compose build
+
+# Start the services
 docker-compose up -d
 ```
 
-This will build all services and start them in detached mode.
+### 4. Access the Services
 
-### 5. Verify Deployment
-
-Access your website:
-- Frontend: https://your-server-domain
-- Backend API: https://your-server-domain/api
-- Email service: Internal port 8081
+- Frontend: http://your-server-ip (or https://your-server-ip)
+- Backend API: http://your-server-ip:8080
+- Email Service: http://your-server-ip:8081
 
 ## Troubleshooting
 
-- **SSL Issues**: Make sure your SSL certificates are correctly named and placed in the ssl/ directory
-- **Build Failures**: Check the logs with `docker-compose logs [service-name]`
-- **Port Conflicts**: Ensure ports 80, 443, 8080, and 8081 are available on your server
+If you encounter any issues:
 
-## Services
+1. Check Docker logs:
+   ```bash
+   docker-compose logs
+   ```
 
-- **Frontend**: Nginx serving the React application
-- **Backend**: Java Spring Boot API
-- **Email Service**: Java service for email functionality
+2. Verify your GitHub credentials have access to the repositories
 
-## Maintenance
+3. Ensure all ports are open in your firewall:
+   ```bash
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw allow 8080/tcp
+   sudo ufw allow 8081/tcp
+   ```
 
-To update any service, replace the code in its respective directory and rebuild:
+## Project Structure
 
-```bash
-docker-compose build [service-name]
-docker-compose up -d
-```
+- `docker/` - Contains all Dockerfiles
+  - `backend.Dockerfile` - Builds the Java backend service
+  - `email-service.Dockerfile` - Builds the email service
+  - `frontend.Dockerfile` - Builds the React frontend
+  - `nginx.conf` - Nginx configuration for the frontend
+  - `ssl/` - Directory for SSL certificates
+- `docker-compose.yml` - Defines and configures all services

@@ -5,11 +5,14 @@ services:
     build:
       context: .
       dockerfile: ./docker/frontend.Dockerfile
+      args:
+        - GITHUB_USERNAME=${GITHUB_USERNAME}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./ssl:/etc/nginx/ssl:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
     networks:
       - stuco-net
     depends_on:
@@ -20,6 +23,9 @@ services:
     build:
       context: .
       dockerfile: ./docker/backend.Dockerfile
+      args:
+        - GITHUB_USERNAME=${GITHUB_USERNAME}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     ports:
       - "8080:8080"
     environment:
@@ -32,6 +38,9 @@ services:
     build:
       context: .
       dockerfile: ./docker/email-service.Dockerfile
+      args:
+        - GITHUB_USERNAME=${GITHUB_USERNAME}
+        - GITHUB_TOKEN=${GITHUB_TOKEN}
     ports:
       - "8081:8081"
     networks:
