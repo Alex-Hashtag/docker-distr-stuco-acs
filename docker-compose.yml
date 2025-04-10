@@ -4,12 +4,13 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: ./docker/frontend.Dockerfile
+      dockerfile: docker/frontend.Dockerfile
+      context: ./front-end
+      dockerfile: ../docker/frontend.Dockerfile
     ports:
+      - "5173:5173"
       - "80:80"
       - "443:443"
-    volumes:
-      - ./docker/ssl:/etc/nginx/ssl:ro
     networks:
       - stuco-net
     depends_on:
@@ -20,6 +21,10 @@ services:
     build:
       context: ./back-end
       dockerfile: ../docker/backend.Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     networks:
       - stuco-net
     restart: unless-stopped
@@ -28,9 +33,10 @@ services:
     build:
       context: ./email-service
       dockerfile: ../docker/email-service.Dockerfile
+    ports:
+      - "8081:8081"
     networks:
       - stuco-net
     restart: unless-stopped
 
 networks:
-  stuco-net:
