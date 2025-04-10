@@ -18,7 +18,7 @@ services:
 
   backend:
     build:
-      context: /email-service
+      context: emailservice
       dockerfile: ./docker/backend.Dockerfile
     ports:
       - "8080:8080"
@@ -30,7 +30,7 @@ services:
 
   email-service:
     build:
-      context: /backend
+      context: backend
       dockerfile: ./docker/email-service.Dockerfile
     ports:
       - "8081:8081"
