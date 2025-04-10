@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/frontend.Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     ports:
       - "80:80"
       - "443:443"
@@ -20,6 +22,8 @@ services:
     build:
       context: ./back-end
       dockerfile: ../docker/backend.Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
       - stuco-net
     restart: unless-stopped
@@ -28,6 +32,8 @@ services:
     build:
       context: ./email-service
       dockerfile: ../docker/email-service.Dockerfile
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
       - stuco-net
     restart: unless-stopped

@@ -2,7 +2,11 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache git
-RUN git clone https://Alex-Hashtag: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@github.com/Alex-Hashtag/front-end.git .
+
+ARG GITHUB_TOKEN
+RUN git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/" && \
+    git clone https://github.com/Alex-Hashtag/front-end.git .
+
 RUN npm install --legacy-peer-deps
 RUN npm run build
 
@@ -11,5 +15,4 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Create SSL directory (certificates will be mounted at runtime)
 RUN mkdir -p /etc/nginx/ssl
