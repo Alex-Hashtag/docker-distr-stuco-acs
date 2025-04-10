@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   frontend:
     build:
@@ -21,7 +19,7 @@ services:
   backend:
     build:
       context: ./back-end
-      dockerfile: ../docker/backend.Dockerfile
+      dockerfile: ./docker/backend.Dockerfile
       args:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
@@ -31,7 +29,7 @@ services:
   email-service:
     build:
       context: ./email-service
-      dockerfile: ../docker/email-service.Dockerfile
+      dockerfile: ./docker/email-service.Dockerfile
       args:
         GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
