@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   frontend:
@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: ./docker/frontend.Dockerfile
       args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
         GITHUB_TOKEN: ${GITHUB_TOKEN}
     ports:
       - "80:80"
@@ -23,6 +24,7 @@ services:
       context: .
       dockerfile: ./docker/backend.Dockerfile
       args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
         GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
       - stuco-net
@@ -33,6 +35,7 @@ services:
       context: .
       dockerfile: ./docker/email-service.Dockerfile
       args:
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
         GITHUB_TOKEN: ${GITHUB_TOKEN}
     networks:
       - stuco-net
